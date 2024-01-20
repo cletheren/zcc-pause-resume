@@ -100,20 +100,22 @@ class AgentEntry(State):
         # Create the input fields and associated labels
         self.lbl_agent_email = tk.Label(master=self.input_frame, text="Agent Email")
         self.ent_agent_email = tk.Entry(master=self.input_frame, width=30, exportselection=False)
+
+        # If we have a global USER_ID then we should auto-populate
         if USER_ID:
             self.ent_agent_email.insert(-1, USER_ID)
-        self.lbl_agent_email.place(x=40, y=30)
-        self.ent_agent_email.place(x=40, y=50)
-
-        # Create the error labels, only show them if an error occurs
-        self.lbl_error_message = tk.Label(master=self.input_frame, text="")
-        self.lbl_error_message.place(x=40, y=80)
-
-        # Populate the Agent Name field if we already know their name
+        # But we prefer the user id that has already been verified
         try:
             self.ent_agent_email.insert(-1, self.context.agent.email)
         except AttributeError:
             pass
+
+        self.lbl_agent_email.place(x=40, y=30)
+        self.ent_agent_email.place(x=40, y=50)
+
+        # Create the error labels, only show them if an error occurs
+        self.lbl_error_message = tk.Label(master=self.input_frame, fg="red", text="")
+        self.lbl_error_message.place(x=40, y=80)
 
         # Create a Frame to accommodate the Confirm and Cancel buttons
         button_frame = tk.Frame(master=self.ui_frame, width=400, height=100)

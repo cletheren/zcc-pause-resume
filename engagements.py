@@ -1,22 +1,10 @@
 """Classes and methods relating to Contact Centre engagements"""
 
 from abc import ABC, abstractmethod
+
 import requests
 
 from zoom import Client
-
-
-from agent import Agent
-from dotenv import load_dotenv
-import os
-
-
-load_dotenv()
-
-TITLE = "Card Payment App"
-ACCOUNT_ID = os.environ.get("ZOOM_ACCOUNT_ID")
-CLIENT_ID = os.environ.get("ZOOM_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("ZOOM_CLIENT_SECRET")
 
 
 class Engagement:
@@ -126,18 +114,3 @@ class Recording(State):
         # print(f"Engagement {self.context.engagement_id} is in the state of recording.")
         self.call_api(self.context.engagement_id, self.context.client)
         self.context.set_state(Paused())
-
-
-def main():
-    client = Client(CLIENT_ID, CLIENT_SECRET, ACCOUNT_ID)
-    client.get_token()
-    agent = Agent.get_by_email("zoomucaas+cl@gmail.com", client)
-    if agent:
-        engagement = Engagement.get_by_user_id(agent.user_id, client)
-    if agent and engagement:
-        print(agent)
-        print(engagement)
-
-
-if __name__ == "__main__":
-    main()

@@ -1,14 +1,6 @@
 import requests
-from dotenv import load_dotenv
-import os
+
 from zoom import Client
-
-load_dotenv()
-
-TITLE = "Card Payment App"
-ACCOUNT_ID = os.environ.get("ZOOM_ACCOUNT_ID")
-CLIENT_ID = os.environ.get("ZOOM_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("ZOOM_CLIENT_SECRET")
 
 
 class Agent:
@@ -45,14 +37,3 @@ class Agent:
 
     def __repr__(self) -> str:
         return f"Agent(email={self.email!r}, user_id={self.user_id!r})"
-
-
-def main():
-    client = Client(CLIENT_ID, CLIENT_SECRET, ACCOUNT_ID)
-    client.get_token()
-    agent = Agent.get_by_email("", client)
-    print(agent)
-
-
-if __name__ == "__main__":
-    main()
