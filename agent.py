@@ -10,7 +10,7 @@ class Agent:
         self.user_id = user_id
 
     @staticmethod
-    def get_by_email(email: str, client: Client) -> str:
+    def get_by_email(email: str, client: Client):
         """Alternative constructor."""
         if not email:
             # This needs to be better, consider raising an exception
