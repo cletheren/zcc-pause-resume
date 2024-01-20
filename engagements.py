@@ -16,7 +16,16 @@ class Engagement:
         self.engagement_id = engagement_id
 
         # To do, apply logic to check if the engagement is being recorded then choose state accordingly
-        self.set_state(Recording())
+        match self.check_state():
+            case "Recording":
+                self.set_state(Recording())
+            case "Paused":
+                self.set_state(Paused())
+            case "Stopped":
+                self.set_state(Stopped())
+            case _:
+                # Consider raising an exception here because we don't want to see this
+                self.set_state(Stopped())
 
     @property
     def state(self) -> str:
@@ -26,6 +35,23 @@ class Engagement:
         # print(f"Engagement {self.engagement_id!r}: Transitioning to {type(state).__name__}")
         self._state = state
         self._state.context = self
+
+    def check_state(self) -> str:
+        """Use the recording API to check the current engagement's recording status."""
+        endpoint = f"{self.client.base_url}/contact_center/engagements/{self.engagement_id}/recordings/status"
+        if self.client.token_has_expired:
+            self.client.get_token()
+        headers = {
+            "Authorization": f"Bearer {self.client.token}"
+        }
+        try:
+            r = requests.get(endpoint, headers=headers, timeout=3000)
+            r.raise_for_status()
+            return "Recording"
+            # response = r.json()
+            # return response["status"] << Check this
+        except requests.HTTPError:
+            pass
 
     def change(self):
         self._state.toggle()
