@@ -1,4 +1,4 @@
-"""Define the user interface using tkinter"""
+"""Main app"""
 
 
 # TODO There is a potential memory leak, consider deleting class instances when states change
