@@ -37,7 +37,11 @@ class Engagement:
         self._state.context = self
 
     def check_state(self) -> str:
-        """Use the recording API to check the current engagement's recording status."""
+        """
+        Use the recording API to check the current engagement's recording status.
+        Requires the contact_center_engagement:read:admin scope.
+        """
+
         endpoint = f"{self.client.base_url}/contact_center/engagements/{self.engagement_id}/recordings/status"
         if self.client.token_has_expired:
             self.client.get_token()
@@ -59,6 +63,7 @@ class Engagement:
     @staticmethod
     def get_by_user_id(user_id: str, client: Client) -> str:
         """Alternative constructor."""
+        # Need a better way of doing this as the endpoint will be deprecated in August 2024
         endpoint = f"{client.base_url}/contact_center/tasks"
         headers = {
             "Authorization": f"Bearer {client.token}"
@@ -85,7 +90,11 @@ class State(ABC):
     """State design pattern, ABC to define how a state class should be defined."""
     @classmethod
     def call_api(cls, engagement_id: str, client: Client) -> None:
-        """Method to call the pause/resume/status API endpoint."""
+        """
+        Method to call the pause/resume/status API endpoint.
+        Requires the contact_center_engagement:write:admin scope.
+        """
+
         endpoint = f"{client.base_url}/contact_center/engagements/{engagement_id}/recording/{cls.endpoint}"  # pylint: disable="no-member"
         print(f"Calling: {endpoint}")
         if client.token_has_expired:
