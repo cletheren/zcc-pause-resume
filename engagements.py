@@ -17,6 +17,9 @@ class Engagement:
 
         # To do, apply logic to check if the engagement is being recorded then choose state accordingly
         match self.check_state():
+            case "Start":
+                # The status endpoint shows "start" as the status when the call is established
+                self.set_state(Recording())
             case "Recording":
                 self.set_state(Recording())
             case "Paused":
