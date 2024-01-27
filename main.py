@@ -1,9 +1,9 @@
 """Main app"""
 
-
 # TODO There is a potential memory leak, consider deleting class instances when states change
 
 from abc import ABC, abstractmethod
+import logging
 import os
 import sys
 import tkinter as tk
@@ -20,6 +20,9 @@ ACCOUNT_ID = os.environ.get("ZOOM_ACCOUNT_ID")
 CLIENT_ID = os.environ.get("ZOOM_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("ZOOM_CLIENT_SECRET")
 USER_ID = os.environ.get("ZOOM_USER_ID")
+
+logging.basicConfig()
+logging.root.setLevel(logging.DEBUG)
 
 
 class Window:
@@ -81,6 +84,8 @@ class AgentEntry(State):
         if not self.context.engagement:
             self.lbl_error_message.config(text="No active voice engagement!")
             return
+        if self.context.engagement.state == "Recording":
+            self.context.engagement.toggle()
         self.context.set_state(TakePayment())
 
     def draw_window(self):
@@ -100,15 +105,11 @@ class AgentEntry(State):
         # Create the input fields and associated labels
         self.lbl_agent_email = tk.Label(master=self.input_frame, text="Agent Email")
         self.ent_agent_email = tk.Entry(master=self.input_frame, width=30, exportselection=False)
-
-        # If we have a global USER_ID then we should auto-populate
-        if USER_ID:
-            self.ent_agent_email.insert(-1, USER_ID)
-        # But we prefer the user id that has already been verified
         try:
             self.ent_agent_email.insert(-1, self.context.agent.email)
         except AttributeError:
-            pass
+            if USER_ID:
+                self.ent_agent_email.insert(-1, USER_ID)
 
         self.lbl_agent_email.place(x=40, y=30)
         self.ent_agent_email.place(x=40, y=50)
@@ -145,6 +146,11 @@ class TakePayment(State):
         self.ent_amount = None
         self.btn_confirm = None
         self.btn_cancel = None
+
+    def process_input(self) -> None:
+        if self.context.engagement.state == "Paused" and self.context.engagement.initial_state == "Recording":
+            self.context.engagement.toggle()
+        self.context.set_state(AgentEntry())
 
     def draw_window(self) -> None:
         self.context.clear_ui()
@@ -183,8 +189,8 @@ class TakePayment(State):
         self.button_frame.grid(row=1, column=0)
 
         # Create the buttons to Confirm or Cancel
-        self.btn_confirm = tk.Button(master=self.button_frame, text="Confirm", width=11, command=lambda: self.context.set_state(AgentEntry()))
-        self.btn_cancel = tk.Button(master=self.button_frame, text="Cancel", width=11, command=lambda: self.context.set_state(AgentEntry()))
+        self.btn_confirm = tk.Button(master=self.button_frame, text="Confirm", width=11, command=self.process_input)
+        self.btn_cancel = tk.Button(master=self.button_frame, text="Cancel", width=11, command=self.process_input)
         self.btn_confirm.place(x=40, y=0)
         self.btn_cancel.place(x=190, y=0)
 
